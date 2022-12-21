@@ -1,0 +1,49 @@
+.container{
+  max-width: 500px;
+    margin: 20px auto;
+}
+
+.form{
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0, 0.5);
+}
+
+.formItem{
+  margin-bottom: 10px;
+}
+
+.input{
+padding: 5px 20px;
+}
+
+.wrongPwd{
+  color: red;
+  margin-bottom: 10px;
+}
+
+.submitButton{
+  padding: 10px 30px;
+  background-color:rgb(0,139,139);
+  border: none;
+  border-radius: 5px;
+  font-size: 1.5em;
+  margin-bottom: 10px;
+}
+
+.formError{
+  margin: 3px 0 0;
+}
+
+#image {
+  display: block;
+
+  /* This rule is very important, please don't ignore this */
+  max-width: 100%;
+}
