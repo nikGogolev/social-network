@@ -2,14 +2,17 @@ import { STATUSES } from 'common/constants';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import Header from '../components/header';
+import MyPopup from '../components/my-popup/my-popup';
 import { checkAuthHandler } from '../features/auth/authSlice';
-import { userInfoHandler } from '../features/user/userSlice';
+import { getError, setError } from '../features/error/errorSlice';
 import { useAppDispatch } from '../hooks/hooks';
 import styles from './index.module.scss';
 
-export function Index() {
+export function Index({ auth }) {
   const dispatch = useAppDispatch();
+  const error = useSelector(getError);
   const router = useRouter();
   const [err, setErr] = useState('');
   interface AuthResp {
@@ -35,11 +38,12 @@ export function Index() {
         }
 
         if (res.meta?.requestStatus === 'rejected') {
+          dispatch(setError((res.payload as AuthResp).message));
           setErr((res.payload as AuthResp).message);
         }
       } catch (error) {
+        dispatch(setError(error.message));
         setErr(error.message);
-        console.log('error', error.message);
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -47,7 +51,8 @@ export function Index() {
 
   return (
     <>
-      <Header />
+      <Header auth={auth} />
+      {error.isError && <MyPopup errorText={error.errorMessage} />}
       <div className={styles.container}>
         Loading...
         <Link href={'/users'}>to users</Link>

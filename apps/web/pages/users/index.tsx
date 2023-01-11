@@ -2,12 +2,20 @@ import Header from '../../components/header';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { UserInterface } from '../../../../common/interfaces/UserInterface';
-// import { useSelector } from 'react-redux';
-// import { getAuthState } from '../../features/auth/authSlice';
+import { AuthInterface } from 'common/interfaces/AuthInterface';
+import MyPopup from '../../components/my-popup/my-popup';
+import { useAppDispatch } from '../../hooks/hooks';
+import { useSelector } from 'react-redux';
+import { getError, setError } from '../../features/error/errorSlice';
 
-export function Users() {
+export interface UserProps {
+  auth?: AuthInterface;
+}
+
+export function Users(props: UserProps) {
+  const dispatch = useAppDispatch();
+  const error = useSelector(getError);
   const [users, setUsers] = useState([] as UserInterface[]);
-  // const isAuth = useSelector(getAuthState);
 
   useEffect(() => {
     (async () => {
@@ -20,19 +28,22 @@ export function Users() {
           headers: {
             'Content-Type': 'application/json',
             Accept: 'application/json',
-            //'Access-Control-Allow-Origin': 'http://localhost:4200',
           },
         });
-        const user: UserInterface[] = await response.json();
-        setUsers(user);
+        const data = await response.json();
+        const users: UserInterface[] = data.response?.payload;
+
+        setUsers(users);
       } catch (error) {
-        console.log(error.message);
+        dispatch(setError(error.message));
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
     <>
-      <Header />
+      <Header {...props} />
+      {error.isError && <MyPopup errorText={error.errorMessage} />}
       {users ? (
         users.map((user) => (
           <div key={user.id}>

@@ -3,10 +3,11 @@ import { UserInterface } from 'common/interfaces/UserInterface';
 import Image from 'next/image';
 import styles from './friend-card.module.scss';
 import Link from 'next/link';
+import { AuthInterface } from 'common/interfaces/AuthInterface';
 
-/* eslint-disable-next-line */
 export interface FriendCardProps {
   user: UserInterface;
+  auth?: AuthInterface;
 }
 
 export function FriendCard(props: FriendCardProps) {

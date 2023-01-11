@@ -10,13 +10,22 @@ import { Button, Input } from '@material-tailwind/react';
 import { loginHandler } from '../../features/auth/authSlice';
 import { useAppDispatch } from '../../hooks/hooks';
 import Header from '../../components/header';
+import { AuthInterface } from 'common/interfaces/AuthInterface';
+import MyPopup from '../../components/my-popup/my-popup';
+import { useSelector } from 'react-redux';
+import { getError, setError } from '../../features/error/errorSlice';
 
-function Login() {
+export interface LoginProps {
+  auth?: AuthInterface;
+}
+
+function Login(props: LoginProps) {
   const [email, setEmail] = useState('');
   const [pwd, setPwd] = useState('');
   const [err, setErr] = useState('');
-
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  const error = useSelector(getError);
 
   const {
     register,
@@ -29,8 +38,6 @@ function Login() {
       pwd: '',
     },
   });
-
-  const dispatch = useAppDispatch();
 
   const onSubmit = async (data) => {
     const hash = crypto.createHash('sha256').update(data.pwd).digest('hex');
@@ -50,15 +57,18 @@ function Login() {
 
       if (res.meta?.requestStatus === 'rejected') {
         setErr(res.payload as string);
+        dispatch(setError(res.payload as string));
         setPwd('');
       }
     } catch (error) {
+      dispatch(() => setError(error.message));
       setErr(error.message);
     }
   };
   return (
     <>
-      <Header />
+      <Header {...props} />
+      {error.isError && <MyPopup errorText={error.errorMessage} />}
       <div className={styles.container}>
         <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
           <h1>Login</h1>

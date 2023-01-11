@@ -16,8 +16,19 @@ import { useRouter } from 'next/router';
 import ReactCrop, { centerCrop, Crop, makeAspectCrop } from 'react-image-crop';
 import loadImage from 'blueimp-load-image';
 import Image from 'next/image';
+import { AuthInterface } from 'common/interfaces/AuthInterface';
+import MyPopup from '../../components/my-popup/my-popup';
+import { useSelector } from 'react-redux';
+import { getError, setError } from '../../features/error/errorSlice';
 
-function Signup() {
+export interface SignupProps {
+  auth?: AuthInterface;
+}
+
+function Signup(props: SignupProps) {
+  const dispatch = useAppDispatch();
+  const error = useSelector(getError);
+
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -40,7 +51,6 @@ function Signup() {
     height: 40,
   });
 
-  const dispatch = useAppDispatch();
   const router = useRouter();
 
   const {
@@ -130,8 +140,8 @@ function Signup() {
         const res = await dispatch(signupHandler(sendData));
 
         if (res.meta?.requestStatus === 'fulfilled') {
-          setPhotoUploadForm(true);
           setUserId(res.payload as number);
+          setPhotoUploadForm(true);
           // setFirstName('');
           // setLastName('');
           // setEmail('');
@@ -142,11 +152,13 @@ function Signup() {
 
         if (res.meta?.requestStatus === 'rejected') {
           setErr(res.payload as string);
+          dispatch(setError(res.payload as string));
         }
       } else {
         setErr('Passwords dont match');
       }
     } catch (error) {
+      dispatch(setError(error.message));
       setErr(error.message);
     }
   };
@@ -170,16 +182,19 @@ function Signup() {
       }
 
       if (res.meta?.requestStatus === 'rejected') {
+        dispatch(setError(res.payload as string));
         setErr(res.payload as string);
       }
     } catch (error) {
+      dispatch(setError(error.message));
       setErr(error.message);
     }
   };
 
   return (
     <>
-      <Header />
+      <Header {...props} />
+      {error.isError && <MyPopup errorText={error.errorMessage} />}
       <div className={styles.container}>
         {photoUploadForm ? (
           <form onSubmit={handleSubmit(onSubmitPhoto)} className={styles.form}>

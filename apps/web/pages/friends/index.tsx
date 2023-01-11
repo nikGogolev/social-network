@@ -8,55 +8,41 @@ import {
 import { useEffect, useState } from 'react';
 import Header from '../../components/header';
 import { MyNavbar } from '../../components/navbar';
-// import styles from './index.module.scss';
-import { useSelector } from 'react-redux';
-import { getUserInfo, userInfoHandler } from '../../features/user/userSlice';
-import { useAppDispatch } from '../../hooks/hooks';
-import { checkAuthHandler } from '../../features/auth/authSlice';
 import { FRIEND_REQUEST_STATUS, STATUSES } from 'common/constants';
 import { UserInterface } from 'common/interfaces/UserInterface';
 import FriendCard from '../../components/friend-card/friend-card';
 import { Button } from '@material-tailwind/react';
+import { AuthInterface } from 'common/interfaces/AuthInterface';
+import { useSelector } from 'react-redux';
+import { getError, setError } from '../../features/error/errorSlice';
+import MyPopup from '../../components/my-popup/my-popup';
+import { useAppDispatch } from '../../hooks/hooks';
 
-/* eslint-disable-next-line */
-export interface FriendsProps {}
+export interface FriendsProps {
+  auth?: AuthInterface;
+}
 
 export function Friends(props: FriendsProps) {
-  const myUser = useSelector(getUserInfo);
+  const error = useSelector(getError);
+  const dispatch = useAppDispatch();
+
   const [myApprovedFriends, setMyApprovedFriends] = useState<UserInterface[]>(
     []
   );
   const [myFriendRequests, setMyFriendRequests] = useState<UserInterface[]>([]);
-  const dispatch = useAppDispatch();
-
-  const checkAuthAndGetUserInfo = async () => {
-    interface AuthResp {
-      status: number;
-      id?: string;
-      message?: string;
-    }
-    try {
-      const res = await dispatch(checkAuthHandler());
-      if ((res.payload as AuthResp).status === STATUSES.SUCCESS) {
-        await dispatch(userInfoHandler(+(res.payload as AuthResp).id));
-      }
-    } catch (error) {
-      console.log('error', error.message);
-    }
-  };
 
   const approveFriendRequest = async (userId) => {
     try {
       const updRes = await updateFriendRequest(
         userId,
-        myUser.id,
+        props.auth.user.id,
         FRIEND_REQUEST_STATUS.approved
       );
       if (updRes.status === STATUSES.SUCCESS) {
         await getFriends();
       }
     } catch (error) {
-      console.log(error.message);
+      dispatch(setError(error.message));
     }
   };
 
@@ -64,51 +50,52 @@ export function Friends(props: FriendsProps) {
     try {
       const updRes = await updateFriendRequest(
         userId,
-        myUser.id,
+        props.auth.user.id,
         FRIEND_REQUEST_STATUS.declined
       );
       if (updRes.status === STATUSES.SUCCESS) {
         await getFriends();
       }
     } catch (error) {
-      console.log(error.message);
+      dispatch(setError(error.message));
     }
   };
 
   const removeFromFriends = async (userId) => {
     try {
-      const checkMeYouRes = await checkFriendRequestStatus(myUser.id, userId);
+      const checkMeYouRes = await checkFriendRequestStatus(
+        props.auth.user.id,
+        userId
+      );
       if (checkMeYouRes.status === STATUSES.SUCCESS) {
         await updateFriendRequest(
-          myUser.id,
+          props.auth.user.id,
           userId,
           FRIEND_REQUEST_STATUS.unfriended
         );
         await getFriends();
       }
-      const checkYouMeRes = await checkFriendRequestStatus(userId, myUser.id);
+      const checkYouMeRes = await checkFriendRequestStatus(
+        userId,
+        props.auth.user.id
+      );
       if (checkYouMeRes.status === STATUSES.SUCCESS) {
         await updateFriendRequest(
           userId,
-          myUser.id,
+          props.auth.user.id,
           FRIEND_REQUEST_STATUS.unfriended
         );
         await getFriends();
       }
     } catch (error) {
-      console.log('error', error.message);
+      dispatch(setError(error.message));
     }
   };
 
-  useEffect(() => {
-    checkAuthAndGetUserInfo();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch]);
-
   const getFriends = async () => {
     try {
-      if (myUser.id) {
-        const reqRes = await findRequests(myUser.id);
+      if (props.auth?.user.id) {
+        const reqRes = await findRequests(props.auth.user.id);
         if (reqRes.status === STATUSES.SUCCESS) {
           const requests = reqRes.payload.reduce((prev, curr) => {
             if (curr.status === FRIEND_REQUEST_STATUS.requested) {
@@ -127,14 +114,13 @@ export function Friends(props: FriendsProps) {
         } else {
           setMyFriendRequests([]);
         }
-        const friendsRes = await findFriends(myUser.id);
-        console.log(friendsRes);
+        const friendsRes = await findFriends(props.auth.user.id);
 
         if (friendsRes.status === STATUSES.SUCCESS) {
           const approves = friendsRes.payload.reduce((prev, curr) => {
             if (curr.status === FRIEND_REQUEST_STATUS.approved) {
               return prev.concat(
-                curr.initiatorId !== myUser.id
+                curr.initiatorId !== props.auth.user.id
                   ? curr.initiatorId
                   : curr.targetId
               );
@@ -152,20 +138,21 @@ export function Friends(props: FriendsProps) {
         }
       }
     } catch (error) {
-      console.log(error.message);
+      dispatch(setError(error.message));
     }
   };
 
   useEffect(() => {
     getFriends();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [myUser.id]);
+  }, [props.auth?.user.id]);
 
   return (
     <>
-      <Header />
+      <Header {...props} />
+      {error.isError && <MyPopup errorText={error.errorMessage} />}
       <div className="flex flex-row justify-between mt-2">
-        <MyNavbar />
+        <MyNavbar {...props} />
         <div className="flex flex-col w-full">
           {myFriendRequests.length ? (
             <div className="ml-2 mb-4 p-4 divide-y-2 flex flex-col grow items-start rounded-xl shadow-md backdrop-saturate-200 backdrop-blur-2xl bg-opacity-80 border border-white/80 bg-white">

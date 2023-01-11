@@ -4,19 +4,18 @@ import {
   MobileNav,
   Typography,
 } from '@material-tailwind/react';
-import { getAuthState } from '../../features/auth/authSlice';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 import Logout from '../logout';
+import { AuthInterface } from 'common/interfaces/AuthInterface';
 // import styles from './index.module.scss';
 
-/* eslint-disable-next-line */
-export interface HeaderProps {}
+export interface HeaderProps {
+  auth?: AuthInterface;
+}
 
 export function Header(props: HeaderProps) {
   const [openNav, setOpenNav] = useState(false);
-  const { isAuth } = useSelector(getAuthState);
 
   useEffect(() => {
     window.addEventListener(
@@ -25,24 +24,9 @@ export function Header(props: HeaderProps) {
     );
   }, []);
 
-  // const navList = (
-  //   <ul className="mb-4 mt-2 flex flex-col gap-2 sm:mb-0 sm:mt-0 sm:flex-row sm:items-center sm:gap-6">
-  //     <Typography
-  //       as="li"
-  //       variant="small"
-  //       color="blue-gray"
-  //       className="p-1 font-normal"
-  //     >
-  //       <Link href="/users" className="flex items-center">
-  //         Users
-  //       </Link>
-  //     </Typography>
-  //   </ul>
-  // );
-
   const authButtons = (
     <ul className="mb-4 mt-2 flex flex-col gap-2 sm:mb-0 sm:mt-0 sm:flex-row sm:items-center items-center sm:gap-6">
-      {!isAuth && (
+      {!props.auth?.isAuthenticated && (
         <Typography as="li" variant="small" className="p-1 font-normal">
           <Button
             variant="gradient"
@@ -56,7 +40,7 @@ export function Header(props: HeaderProps) {
           </Button>
         </Typography>
       )}
-      {isAuth && (
+      {props.auth?.isAuthenticated && (
         <Typography as="li" variant="small" className="p-1 font-normal">
           <Logout />
         </Typography>

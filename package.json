@@ -5,7 +5,7 @@
   "scripts": {
     "start": "nx run-many --target=serve --all",
     "start:api": "nx serve api",
-    "start:web": "nx serve web --port 3002 --open",
+    "start:web": "nx serve web --port 4200 --open",
     "build": "nx affected:build --all --configuration=production",
     "build:api": "nx build api",
     "build:web": "nx build web",

@@ -10,10 +10,6 @@ import { FriendRequestInterface } from '../../../../common/interfaces/FriendRequ
 import Image from 'next/image';
 import styles from './index.module.scss';
 import { MyNavbar } from '../../components/navbar';
-import { useSelector } from 'react-redux';
-import { checkAuthHandler } from '../../features/auth/authSlice';
-import { getUserInfo, userInfoHandler } from '../../features/user/userSlice';
-import { useAppDispatch } from '../../hooks/hooks';
 import { Button } from '@material-tailwind/react';
 import {
   addToFriendsHandler,
@@ -22,45 +18,39 @@ import {
   updateFriendRequest,
 } from '../../api/api';
 import { UserInterface } from 'common/interfaces/UserInterface';
+import { AuthInterface } from 'common/interfaces/AuthInterface';
+import MyPopup from '../../components/my-popup/my-popup';
+import { useAppDispatch } from '../../hooks/hooks';
+import { useSelector } from 'react-redux';
+import { getError, setError } from '../../features/error/errorSlice';
 
-function User(props) {
-  console.log('PAGE ID AUTH', props);
+export interface UsersProps {
+  auth?: AuthInterface;
+}
 
+function User(props: UsersProps) {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const myUser = useSelector(getUserInfo);
+  const error = useSelector(getError);
   const [user, setUser] = useState({} as UserInterface);
   const [myFriendRequestStatus, setMyFriendRequestStatus] = useState('');
   const [hisFriendRequestStatus, setHisFriendRequestStatus] = useState('');
 
-  const checkAuthAndGetUserInfo = async () => {
-    interface AuthResp {
-      status: number;
-      id?: number;
-      message?: string;
-    }
-    try {
-      const res = await dispatch(checkAuthHandler());
-      if ((res.payload as AuthResp).status === STATUSES.SUCCESS) {
-        await dispatch(userInfoHandler(+(res.payload as AuthResp).id));
-      }
-    } catch (error) {
-      console.log('error', error.message);
-    }
-  };
-
   const addToFriends = async () => {
     try {
-      const checkRes = await checkFriendRequestStatus(myUser.id, user.id);
+      const checkRes = await checkFriendRequestStatus(
+        props.auth.user.id,
+        user.id
+      );
       if (checkRes.status === STATUSES.SUCCESS) {
         const updRes = await updateFriendRequest(
-          myUser.id,
+          props.auth.user.id,
           user.id,
           FRIEND_REQUEST_STATUS.requested
         );
         if (updRes.status === STATUSES.SUCCESS) {
           const checkMeYouRes = await checkFriendRequestStatus(
-            myUser.id,
+            props.auth.user.id,
             user.id
           );
           if (checkMeYouRes.status === STATUSES.SUCCESS) {
@@ -70,10 +60,10 @@ function User(props) {
           }
         }
       } else {
-        const addRes = await addToFriendsHandler(myUser.id, user.id);
+        const addRes = await addToFriendsHandler(props.auth.user.id, user.id);
         if (addRes.status === STATUSES.SUCCESS) {
           const checkMeYouRes = await checkFriendRequestStatus(
-            myUser.id,
+            props.auth.user.id,
             user.id
           );
           if (checkMeYouRes.status === STATUSES.SUCCESS) {
@@ -84,7 +74,7 @@ function User(props) {
         }
       }
     } catch (error) {
-      console.log('error', error.message);
+      dispatch(setError(error.message));
     }
   };
 
@@ -92,12 +82,12 @@ function User(props) {
     try {
       const updRes = await updateFriendRequest(
         user.id,
-        myUser.id,
+        props.auth.user.id,
         FRIEND_REQUEST_STATUS.approved
       );
       if (updRes.status === STATUSES.SUCCESS) {
         const checkMeYouRes = await checkFriendRequestStatus(
-          myUser.id,
+          props.auth.user.id,
           user.id
         );
         if (checkMeYouRes.status === STATUSES.SUCCESS) {
@@ -107,7 +97,7 @@ function User(props) {
         }
         const checkYouMeRes = await checkFriendRequestStatus(
           user.id,
-          myUser.id
+          props.auth.user.id
         );
         if (checkYouMeRes.status === STATUSES.SUCCESS) {
           setHisFriendRequestStatus(
@@ -116,7 +106,7 @@ function User(props) {
         }
       }
     } catch (error) {
-      console.log('error', error.message);
+      dispatch(setError(error.message));
     }
   };
 
@@ -124,12 +114,12 @@ function User(props) {
     try {
       const updRes = await updateFriendRequest(
         user.id,
-        myUser.id,
+        props.auth.user.id,
         FRIEND_REQUEST_STATUS.declined
       );
       if (updRes.status === STATUSES.SUCCESS) {
         const checkMeYouRes = await checkFriendRequestStatus(
-          myUser.id,
+          props.auth.user.id,
           user.id
         );
         if (checkMeYouRes.status === STATUSES.SUCCESS) {
@@ -139,7 +129,7 @@ function User(props) {
         }
         const checkYouMeRes = await checkFriendRequestStatus(
           user.id,
-          myUser.id
+          props.auth.user.id
         );
         if (checkYouMeRes.status === STATUSES.SUCCESS) {
           setHisFriendRequestStatus(
@@ -148,35 +138,41 @@ function User(props) {
         }
       }
     } catch (error) {
-      console.log('error', error.message);
+      dispatch(setError(error.message));
     }
   };
 
   const removeFromFriends = async () => {
     try {
-      const checkMeYouRes = await checkFriendRequestStatus(myUser.id, user.id);
+      const checkMeYouRes = await checkFriendRequestStatus(
+        props.auth.user.id,
+        user.id
+      );
       if (checkMeYouRes.status === STATUSES.SUCCESS) {
         await updateFriendRequest(
-          myUser.id,
+          props.auth.user.id,
           user.id,
           FRIEND_REQUEST_STATUS.unfriended
         );
       }
-      const checkYouMeRes = await checkFriendRequestStatus(user.id, myUser.id);
+      const checkYouMeRes = await checkFriendRequestStatus(
+        user.id,
+        props.auth.user.id
+      );
       if (checkYouMeRes.status === STATUSES.SUCCESS) {
         await updateFriendRequest(
           user.id,
-          myUser.id,
+          props.auth.user.id,
           FRIEND_REQUEST_STATUS.unfriended
         );
       }
     } catch (error) {
-      console.log('error', error.message);
+      dispatch(setError(error.message));
     }
   };
 
   const friendStatus = useMemo(() => {
-    if (user.id === myUser.id) {
+    if (user.id === props.auth.user.id) {
       return <></>;
     } else if (
       (myFriendRequestStatus === FRIEND_REQUEST_STATUS.unfriended ||
@@ -234,13 +230,18 @@ function User(props) {
       return null;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [myFriendRequestStatus, hisFriendRequestStatus, user.id, myUser.id]);
+  }, [
+    myFriendRequestStatus,
+    hisFriendRequestStatus,
+    user.id,
+    props.auth?.user.id,
+  ]);
 
   useEffect(() => {
     setMyFriendRequestStatus('');
     setHisFriendRequestStatus('');
-    if (myUser.id && user.id) {
-      checkFriendRequestStatus(myUser.id, user.id)
+    if (props.auth?.user.id && user.id) {
+      checkFriendRequestStatus(props.auth.user.id, user.id)
         .then((res) => {
           if (res.status === STATUSES.SUCCESS) {
             setMyFriendRequestStatus(
@@ -249,9 +250,9 @@ function User(props) {
           }
         })
         .catch((error) => {
-          console.log(error.message);
+          dispatch(setError(error.message));
         });
-      checkFriendRequestStatus(user.id, myUser.id)
+      checkFriendRequestStatus(user.id, props.auth.user.id)
         .then((res) => {
           if (res.status === STATUSES.SUCCESS) {
             setHisFriendRequestStatus(
@@ -260,11 +261,11 @@ function User(props) {
           }
         })
         .catch((error) => {
-          console.log(error.message);
+          dispatch(setError(error.message));
         });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user.id, myUser]);
+  }, [user.id, props.auth?.user]);
 
   useEffect(() => {
     (async () => {
@@ -276,22 +277,18 @@ function User(props) {
           }
         }
       } catch (error) {
-        console.log(error.message);
+        dispatch(setError(error.message));
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.query.id]);
 
-  useEffect(() => {
-    checkAuthAndGetUserInfo();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch]);
-
   return (
     <>
-      <Header />
+      <Header {...props} />
+      {error.isError && <MyPopup errorText={error.errorMessage} />}
       <div className="flex flex-row justify-between mt-2">
-        <MyNavbar />
+        <MyNavbar {...props} />
         <div className="ml-2 p-4 flex flex-col grow items-start rounded-xl shadow-md backdrop-saturate-200 backdrop-blur-2xl bg-opacity-80 border border-white/80 bg-white">
           <h1 className={styles['profile-description-header']}>
             {user.firstName} {user.lastName}
@@ -342,8 +339,4 @@ function User(props) {
   );
 }
 
-// User.getInitialProps = async (ctx) => {
-//   console.log(ctx);
-//   return { auth: true };
-// };
 export default User;

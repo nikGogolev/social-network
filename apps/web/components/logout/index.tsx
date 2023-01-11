@@ -3,9 +3,11 @@ import { logoutHandler } from '../../features/auth/authSlice';
 import { useRouter } from 'next/router';
 import { useDispatch } from 'react-redux';
 import { AnyAction } from 'redux';
+import { AuthInterface } from 'common/interfaces/AuthInterface';
 
-/* eslint-disable-next-line */
-export interface LogoutProps {}
+export interface LogoutProps {
+  auth?: AuthInterface;
+}
 
 export function Logout(props: LogoutProps) {
   const router = useRouter();

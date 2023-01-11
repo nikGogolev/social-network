@@ -1,17 +1,16 @@
 import { Navbar, Typography } from '@material-tailwind/react';
-import { getUserInfo } from '../../features/user/userSlice';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { findRequests } from '../../api/api';
 import { FRIEND_REQUEST_STATUS, STATUSES } from 'common/constants';
+import { AuthInterface } from 'common/interfaces/AuthInterface';
 // import styles from './navbar.module.scss';
 
-/* eslint-disable-next-line */
-export interface MyNavbarProps {}
+export interface MyNavbarProps {
+  auth?: AuthInterface;
+}
 
 export function MyNavbar(props: MyNavbarProps) {
-  const myUser = useSelector(getUserInfo);
   const [friendRequests, setFriendRequests] = useState(0);
   const navLinks = {
     main: { icon: '', name: 'My page', link: '/', counter: 0 },
@@ -25,8 +24,8 @@ export function MyNavbar(props: MyNavbarProps) {
     photos: { icon: '', name: 'Photos', link: '/photos', counter: 0 },
   };
   const getFriends = async () => {
-    if (myUser.id) {
-      const friendsRes = await findRequests(myUser.id);
+    if (props.auth?.user.id) {
+      const friendsRes = await findRequests(props.auth.user.id);
       if (friendsRes.status === STATUSES.SUCCESS) {
         const requests = friendsRes.payload.reduce((prev, curr) => {
           if (curr.status === FRIEND_REQUEST_STATUS.requested) {
@@ -43,7 +42,7 @@ export function MyNavbar(props: MyNavbarProps) {
   useEffect(() => {
     getFriends();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [myUser.id]);
+  }, [props.auth?.user]);
   const navList = (
     <ul className="mb-4 mt-2 flex flex-col items-stretch gap-2 mb-0 mt-0 items-center gap-4 w-28 ">
       {Object.values(navLinks).map((item) => (
