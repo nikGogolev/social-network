@@ -1,4 +1,4 @@
-export const API_URL = 'http://localhost:3001/api';
+export const API_URL = 'http://188.225.27.34:3001/api';
 
 type AuthCookie = {
   email: string;
