@@ -162,7 +162,7 @@ function User(props: UsersProps) {
       if (checkYouMeRes.status === STATUSES.SUCCESS) {
         await updateFriendRequest(
           user.id,
-          props.auth.user.id,
+          props.auth?.user?.id,
           FRIEND_REQUEST_STATUS.unfriended
         );
       }
@@ -172,7 +172,7 @@ function User(props: UsersProps) {
   };
 
   const friendStatus = useMemo(() => {
-    if (user.id === props.auth.user.id) {
+    if (user.id === props.auth?.user?.id) {
       return <></>;
     } else if (
       (myFriendRequestStatus === FRIEND_REQUEST_STATUS.unfriended ||
@@ -234,13 +234,13 @@ function User(props: UsersProps) {
     myFriendRequestStatus,
     hisFriendRequestStatus,
     user.id,
-    props.auth?.user.id,
+    props.auth?.user?.id,
   ]);
 
   useEffect(() => {
     setMyFriendRequestStatus('');
     setHisFriendRequestStatus('');
-    if (props.auth?.user.id && user.id) {
+    if (props.auth?.user?.id && user.id) {
       checkFriendRequestStatus(props.auth.user.id, user.id)
         .then((res) => {
           if (res.status === STATUSES.SUCCESS) {

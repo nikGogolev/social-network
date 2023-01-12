@@ -23,7 +23,12 @@ async function bootstrap() {
   app.useStaticAssets(join(process.cwd(), 'public'), { fallthrough: true });
   app.use(cookieParser());
   app.enableCors({
-    origin: ['http://localhost:4200', 'http://localhost:3001'],
+    origin: [
+      'http://localhost:4200',
+      'http://localhost:3001',
+      'http://192.168.0.180:4200',
+      'http://188.225.27.34:4200',
+    ],
     credentials: true,
   });
   const port = process.env.PORT || 3001;
