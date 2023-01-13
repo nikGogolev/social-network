@@ -125,7 +125,7 @@ export const uploadPhoto = async (photo, userId) => {
 
 export const getUserInfoFromServer = async (id) => {
   try {
-    const response = await fetch(`http://localhost:3001/api/users/${id}`, {
+    const response = await fetch(`${API_URL}/users/${id}`, {
       method: 'GET',
       mode: 'cors',
       redirect: 'follow',

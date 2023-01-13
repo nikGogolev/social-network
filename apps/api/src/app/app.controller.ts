@@ -22,7 +22,7 @@ export class AppController {
 
         const findedUser: UserInterface = dbResponse.dataValues;
         if (token === findedUser.token) {
-          res.redirect(`http://localhost:4200/users/${findedUser.id}`);
+          res.redirect(`http://188.225.27.34:4200/users/${findedUser.id}`);
           return {
             response: {
               status: STATUSES.SUCCESS,
@@ -30,7 +30,7 @@ export class AppController {
             },
           };
         } else {
-          res.redirect(`http://localhost:4200/login`);
+          res.redirect(`http://188.225.27.34:4200/login`);
           return {
             response: {
               status: STATUSES.PASSWORD_ERROR,
@@ -39,7 +39,7 @@ export class AppController {
           };
         }
       } else {
-        res.redirect(`http://localhost:4200/signup`);
+        res.redirect(`http://188.225.27.34:4200/signup`);
       }
     } catch (error) {
       console.log(error.message);

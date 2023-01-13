@@ -138,7 +138,7 @@ export class SignupController {
         hometown: body.hometown,
         gender: body.gender,
         birthdate: body.birthdate || '1970-01-01',
-        photo: `http://localhost:3001/${dbImagePath}`,
+        photo: `http://188.225.27.34:3001/${dbImagePath}`,
       });
       if (dbResponse) {
         return { response: { status: STATUSES.SUCCESS } };

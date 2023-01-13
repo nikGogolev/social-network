@@ -20,7 +20,7 @@ export function Users(props: UserProps) {
   useEffect(() => {
     (async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/users', {
+        const response = await fetch('http://188.225.27.34:3001/api/users', {
           method: 'GET',
           mode: 'cors',
           redirect: 'follow',
