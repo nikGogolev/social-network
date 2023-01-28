@@ -7,6 +7,7 @@ import MyPopup from '../../components/my-popup/my-popup';
 import { useAppDispatch } from '../../hooks/hooks';
 import { useSelector } from 'react-redux';
 import { getError, setError } from '../../features/error/errorSlice';
+import { API_URL } from '../../api/api';
 
 export interface UserProps {
   auth?: AuthInterface;
@@ -20,7 +21,7 @@ export function Users(props: UserProps) {
   useEffect(() => {
     (async () => {
       try {
-        const response = await fetch('http://188.225.27.34:3001/api/users', {
+        const response = await fetch(`${API_URL}/users`, {
           method: 'GET',
           mode: 'cors',
           redirect: 'follow',

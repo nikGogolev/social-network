@@ -18,7 +18,8 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'http',
-        hostname: '188.225.27.34',
+        hostname:
+          process.env.NODE_ENV === 'production' ? '188.225.27.34' : 'localhost',
         port: '3001',
         pathname: '/public/**',
       },

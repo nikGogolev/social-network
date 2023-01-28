@@ -1,4 +1,7 @@
-export const API_URL = 'http://188.225.27.34:3001/api';
+export const API_URL =
+  process.env.NODE_ENV === 'production'
+    ? 'http://188.225.27.34:3001/api'
+    : 'http://localhost:3001/api';
 
 type AuthCookie = {
   email: string;
@@ -289,6 +292,34 @@ export const getUsersByIds = async (idxs: string) => {
       },
     });
     const resData = await response.json();
+    if (resData.response) {
+      return resData.response;
+    } else {
+      return { error: 'Wrong answer' };
+    }
+  } catch (error) {
+    return { error: error.message };
+  }
+};
+
+export const findMessages = async (userId) => {
+  try {
+    const response = await fetch(
+      `${API_URL}/messages?id=${userId}&offset=0&count=5`,
+      {
+        method: 'GET',
+        mode: 'cors',
+        redirect: 'follow',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        // body: JSON.stringify({ initiatorId, targetId }),
+      }
+    );
+    const resData = await response.json();
+
     if (resData.response) {
       return resData.response;
     } else {

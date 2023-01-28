@@ -71,9 +71,9 @@ function Signup(props: SignupProps) {
     },
   });
 
-  const cropPh = async () => {
+  const getScaledImage = async () => {
     const img = document.getElementById('image') as HTMLImageElement;
-    const scaledImage = loadImage.scale(
+    const scaledImage: HTMLCanvasElement = loadImage.scale(
       img, // img or canvas element
       {
         top: (originHeight * crop.y) / 100,
@@ -84,7 +84,7 @@ function Signup(props: SignupProps) {
       }
     );
 
-    return scaledImage.toDataURL();
+    return scaledImage;
   };
 
   const showPhoto = () => {
@@ -167,24 +167,29 @@ function Signup(props: SignupProps) {
     const formdata = new FormData();
 
     try {
-      setErr('');
-      formdata.append('country', country);
-      formdata.append('hometown', hometown);
-      formdata.append('gender', gender);
-      formdata.append('birthdate', birthdate);
-      formdata.append('file', await cropPh());
-      const res = await dispatch(
-        uploadPhotoHandler({ photo: formdata, userId })
-      );
+      const scaledImage = await getScaledImage();
+      scaledImage.toBlob(async (blob: Blob) => {
+        const newFile = new File([blob], 'temp.jpg', blob);
 
-      if (res.meta?.requestStatus === 'fulfilled') {
-        router.push(`users/${userId}`);
-      }
+        setErr('');
+        formdata.append('country', country);
+        formdata.append('hometown', hometown);
+        formdata.append('gender', gender);
+        formdata.append('birthdate', birthdate);
+        formdata.append('file', newFile);
+        const res = await dispatch(
+          uploadPhotoHandler({ photo: formdata, userId })
+        );
 
-      if (res.meta?.requestStatus === 'rejected') {
-        dispatch(setError(res.payload as string));
-        setErr(res.payload as string);
-      }
+        if (res.meta?.requestStatus === 'fulfilled') {
+          router.push(`users/${userId}`);
+        }
+
+        if (res.meta?.requestStatus === 'rejected') {
+          dispatch(setError(res.payload as string));
+          setErr(res.payload as string);
+        }
+      });
     } catch (error) {
       dispatch(setError(error.message));
       setErr(error.message);

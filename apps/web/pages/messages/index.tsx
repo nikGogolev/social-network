@@ -5,15 +5,46 @@ import { MyNavbar } from '../../components/navbar';
 import { useAppDispatch } from '../../hooks/hooks';
 import { useSelector } from 'react-redux';
 import { getError } from '../../features/error/errorSlice';
+import { useEffect } from 'react';
+import { findMessages } from '../../api/api';
+import { MessageInterface } from 'common/interfaces/MessageInterface';
 // import styles from './index.module.scss';
 
 export interface MessagesProps {
   auth?: AuthInterface;
 }
 
-export function Messages(props) {
+export function Messages(props: MessagesProps) {
   const dispatch = useAppDispatch();
   const error = useSelector(getError);
+  useEffect(() => {
+    (async () => {
+      const response = await findMessages(props.auth?.user.id);
+      const messages: MessageInterface[] = response.payload;
+      console.log(messages);
+      const sortedMessages = {};
+      messages.forEach((item) => {
+        switch (item.fromUserId) {
+          case props.auth?.user.id:
+            if (!sortedMessages[item.toUserId]) {
+              sortedMessages[item.toUserId] = [item];
+            } else {
+              sortedMessages[item.toUserId].push(item);
+            }
+            break;
+
+          default:
+            if (!sortedMessages[item.fromUserId]) {
+              sortedMessages[item.fromUserId] = [item];
+            } else {
+              sortedMessages[item.fromUserId].push(item);
+            }
+            break;
+        }
+      });
+      console.log(sortedMessages);
+    })();
+  }, []);
 
   return (
     <>
