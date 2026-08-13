@@ -18,7 +18,7 @@ export class SignupController {
   constructor(private signupService: SignupService) {}
   @Post()
   async signup(@Body() signupUserDto: SignupUserDto, @Res() res: Response) {
-    this.signupService.signup(signupUserDto, res);
+    return this.signupService.signup(signupUserDto, res);
   }
 
   @Post(':id')

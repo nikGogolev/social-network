@@ -12,11 +12,8 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { runDB } from './app/types';
 
-(async () => {
-  await runDB();
-})();
-
 async function bootstrap() {
+  await runDB();
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);

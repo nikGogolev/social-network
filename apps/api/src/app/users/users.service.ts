@@ -8,19 +8,20 @@ import { User } from '../types/users';
 export class UsersService {
   async getAll(idxs) {
     try {
-      if (idxs) {
-        const dbResponse = await User.findAll({
-          include: [{ model: Profile, where: { userId: idxs.split(',') } }],
-        });
-        const findedUser = dbResponse;
+      const ids = idxs
+        ? String(idxs)
+            .split(',')
+            .map((id) => id.trim())
+            .filter(Boolean)
+        : null;
 
-        return { response: { status: STATUSES.SUCCESS, payload: findedUser } };
-      }
       const dbResponse = await User.findAll({
-        include: [{ model: Profile }],
+        ...(ids ? { where: { id: ids } } : {}),
+        include: [{ model: Profile, required: false }],
+        attributes: { exclude: ['pwdHash', 'token'] },
       });
-      const findedUser = dbResponse;
-      return { response: { status: STATUSES.SUCCESS, payload: findedUser } };
+
+      return { response: { status: STATUSES.SUCCESS, payload: dbResponse } };
     } catch (error) {
       console.log(error.message);
       return {
@@ -35,20 +36,24 @@ export class UsersService {
   async getOne(id: string, cookies: object) {
     try {
       const dbResponse = await User.findOne({
-        include: [{ model: Profile, where: { userId: id } }],
+        where: { id },
+        include: [{ model: Profile, required: false }],
+        attributes: { exclude: ['pwdHash', 'token'] },
       });
+
+      if (!dbResponse?.dataValues) {
+        return {
+          response: {
+            status: STATUSES.USER_NOT_EXIST,
+            message: 'User not exist',
+          },
+        };
+      }
 
       const findedUser: UserInterface = {
         ...(dbResponse.dataValues as unknown as UserInterface),
-        owner: cookies['email'] === dbResponse.dataValues.email ? true : false,
+        owner: cookies?.['email'] === dbResponse.dataValues.email,
       };
-      // console.log(dbResponse.dataValues);
-      // if (req.cookies['email'] === findedUser.email) {
-      //   findedUser.owner = true;
-      // } else {
-      //   findedUser.owner = false;
-      // }
-      // console.log(findedUser);
 
       return {
         response: {
@@ -56,22 +61,6 @@ export class UsersService {
           payload: findedUser,
         },
       };
-
-      // if (req.cookies['token'] === findedUser.token) {
-      //   return {
-      //     response: {
-      //       status: STATUSES.SUCCESS,
-      //       payload: findedUser,
-      //     },
-      //   };
-      // } else {
-      //   return {
-      //     response: {
-      //       status: STATUSES.PASSWORD_ERROR,
-      //       message: 'You are not authorized',
-      //     },
-      //   };
-      // }
     } catch (error) {
       return {
         response: {

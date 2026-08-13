@@ -59,6 +59,15 @@ export class SignupService {
   }
 
   async loadPhoto(id: string, body: SignupProfileDto, files) {
+    if (!files?.file?.[0]) {
+      return {
+        response: {
+          status: STATUSES.INTERNAL_ERROR,
+          message: 'Photo file is required',
+        },
+      };
+    }
+
     const fileName = Array(32)
       .fill(null)
       .map(() => Math.round(Math.random() * 16).toString(16))
@@ -79,25 +88,37 @@ export class SignupService {
       '.' +
       files.file[0].originalname.split('.').pop();
     try {
-      const dbResponse = await Profile.create({
-        userId: id,
-        country: body.country,
-        hometown: body.hometown,
-        gender: body.gender,
-        birthdate: body.birthdate || '1970-01-01',
-        photo: `${
-          process.env.NODE_ENV === 'production'
-            ? 'http://188.225.27.34:3001'
-            : 'http://localhost:3001'
-        }/${dbImagePath}`,
+      const [profile, created] = await Profile.findOrCreate({
+        where: { userId: id },
+        defaults: {
+          userId: id,
+          country: body.country,
+          hometown: body.hometown,
+          gender: body.gender,
+          birthdate: body.birthdate || '1970-01-01',
+          photo: `${
+            process.env.NODE_ENV === 'production'
+              ? 'http://188.225.27.34:3001'
+              : 'http://localhost:3001'
+          }/${dbImagePath}`,
+        },
       });
-      if (dbResponse) {
-        return { response: { status: STATUSES.SUCCESS } };
-      } else {
-        return {
-          response: { status: STATUSES.INTERNAL_ERROR },
-        };
+
+      if (!created) {
+        await profile.update({
+          country: body.country,
+          hometown: body.hometown,
+          gender: body.gender,
+          birthdate: body.birthdate || '1970-01-01',
+          photo: `${
+            process.env.NODE_ENV === 'production'
+              ? 'http://188.225.27.34:3001'
+              : 'http://localhost:3001'
+          }/${dbImagePath}`,
+        });
       }
+
+      return { response: { status: STATUSES.SUCCESS } };
     } catch (error) {
       console.log(error.message);
       return {

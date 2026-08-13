@@ -48,7 +48,7 @@ export function Users(props: UserProps) {
       {users ? (
         users.map((user) => (
           <div key={user.id}>
-            <Link href={`users/${user.id}`}>
+            <Link href={`/users/${user.id}`}>
               User:
               <p>{user.firstName}</p>
               <p>{user.lastName}</p>

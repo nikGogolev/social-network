@@ -8,10 +8,21 @@ export const config = {
 };
 
 export async function middleware(request: NextRequest) {
-  const email = request.cookies.get('email');
-  const token = request.cookies.get('token');
+  const email = request.cookies.get('email')?.value;
+  const token = request.cookies.get('token')?.value;
+
+  if (!email || !token) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
   const res = await checkAuth({ email, token });
-  if (res.status === STATUSES.NOT_AUTHORIZED) {
+
+  if (
+    !res ||
+    res.error ||
+    res.status === STATUSES.NOT_AUTHORIZED ||
+    res.status === STATUSES.INTERNAL_ERROR
+  ) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
   if (res.status === STATUSES.USER_NOT_EXIST) {
