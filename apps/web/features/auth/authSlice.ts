@@ -105,6 +105,10 @@ export const loginHandler = createAsyncThunk(
       if (!response.error && response.status === STATUSES.PASSWORD_ERROR) {
         return rejectWithValue('Wrong password');
       }
+      if (!response.error && response.status === STATUSES.USER_NOT_EXIST) {
+        return rejectWithValue('User not exist');
+      }
+      return rejectWithValue('Login failed');
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -142,6 +146,7 @@ export const signupHandler = createAsyncThunk(
       if (!response.error && response.status === STATUSES.USER_EXIST) {
         return rejectWithValue('User exist');
       }
+      return rejectWithValue('Signup failed');
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -168,9 +173,10 @@ export const uploadPhotoHandler = createAsyncThunk(
         return fulfillWithValue(response.payload);
       }
 
-      if (!response.error && response.status === STATUSES.USER_EXIST) {
-        return rejectWithValue('User exist');
+      if (!response.error && response.status === STATUSES.INTERNAL_ERROR) {
+        return rejectWithValue(response.message || 'Upload failed');
       }
+      return rejectWithValue('Upload failed');
     } catch (error) {
       return rejectWithValue(error.message);
     }

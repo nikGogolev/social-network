@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import crypto from 'crypto';
 import styles from './index.module.scss';
 
 import { useForm } from 'react-hook-form';
@@ -20,6 +19,7 @@ import { AuthInterface } from 'common/interfaces/AuthInterface';
 import MyPopup from '../../components/my-popup/my-popup';
 import { useSelector } from 'react-redux';
 import { getError, setError } from '../../features/error/errorSlice';
+import { hashPassword } from '../../helpers/hashPassword';
 
 export interface SignupProps {
   auth?: AuthInterface;
@@ -125,7 +125,7 @@ function Signup(props: SignupProps) {
   const onCropChange = (crop, percentCrop) => setCrop(percentCrop);
 
   const onSubmit = async (data) => {
-    const hash = crypto.createHash('sha256').update(data.pwd).digest('hex');
+    const hash = await hashPassword(data.pwd);
 
     try {
       setErr('');
@@ -182,7 +182,7 @@ function Signup(props: SignupProps) {
         );
 
         if (res.meta?.requestStatus === 'fulfilled') {
-          router.push(`users/${userId}`);
+          router.push(`/users/${userId}`);
         }
 
         if (res.meta?.requestStatus === 'rejected') {

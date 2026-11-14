@@ -27,14 +27,14 @@ export function Index({ auth }) {
         const res = await dispatch(checkAuthHandler());
 
         if ((res.payload as AuthResp).status === STATUSES.SUCCESS) {
-          router.push(`users/${(res.payload as AuthResp).id}`);
+          router.push(`/users/${(res.payload as AuthResp).id}`);
         }
 
         if ((res.payload as AuthResp).status === STATUSES.NOT_AUTHORIZED) {
-          router.push(`login`);
+          router.push(`/login`);
         }
         if ((res.payload as AuthResp).status === STATUSES.USER_NOT_EXIST) {
-          router.push(`signup`);
+          router.push(`/signup`);
         }
 
         if (res.meta?.requestStatus === 'rejected') {

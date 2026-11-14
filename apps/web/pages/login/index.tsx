@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import crypto from 'crypto';
 import styles from './index.module.scss';
 
 import { useForm } from 'react-hook-form';
@@ -14,6 +13,7 @@ import { AuthInterface } from 'common/interfaces/AuthInterface';
 import MyPopup from '../../components/my-popup/my-popup';
 import { useSelector } from 'react-redux';
 import { getError, setError } from '../../features/error/errorSlice';
+import { hashPassword } from '../../helpers/hashPassword';
 
 export interface LoginProps {
   auth?: AuthInterface;
@@ -40,7 +40,7 @@ function Login(props: LoginProps) {
   });
 
   const onSubmit = async (data) => {
-    const hash = crypto.createHash('sha256').update(data.pwd).digest('hex');
+    const hash = await hashPassword(data.pwd);
     try {
       setErr('');
       const res = await dispatch(
@@ -51,7 +51,7 @@ function Login(props: LoginProps) {
       );
 
       if (res.meta?.requestStatus === 'fulfilled') {
-        router.push(`users/${res.payload}`);
+        router.push(`/users/${res.payload}`);
         setEmail('');
       }
 
@@ -61,7 +61,7 @@ function Login(props: LoginProps) {
         setPwd('');
       }
     } catch (error) {
-      dispatch(() => setError(error.message));
+      dispatch(setError(error.message));
       setErr(error.message);
     }
   };

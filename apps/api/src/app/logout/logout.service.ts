@@ -5,7 +5,8 @@ import { Response } from 'express';
 @Injectable()
 export class LogoutService {
   async logout(res: Response) {
-    res.cookie('token', '');
+    res.clearCookie('token');
+    res.clearCookie('email');
     res.send({
       response: {
         status: STATUSES.SUCCESS,

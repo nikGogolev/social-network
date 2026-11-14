@@ -8,6 +8,19 @@ type AuthCookie = {
   token: string;
 };
 
+const buildAuthHeaders = (cookie?: AuthCookie) => {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  };
+  if (cookie?.email && cookie?.token) {
+    headers.Cookie = `email=${encodeURIComponent(
+      cookie.email
+    )}; token=${encodeURIComponent(cookie.token)}`;
+  }
+  return headers;
+};
+
 export const checkAuth = async (cookie?: AuthCookie) => {
   try {
     const response = await fetch(`${API_URL}/auth`, {
@@ -15,11 +28,7 @@ export const checkAuth = async (cookie?: AuthCookie) => {
       mode: 'cors',
       redirect: 'follow',
       credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        Cookie: cookie && `email=${cookie.email}; token=${cookie.token}`,
-      },
+      headers: buildAuthHeaders(cookie),
     });
     const resData = await response.json();
     if (resData.response) {
@@ -279,9 +288,10 @@ export const findFriends = async (userId) => {
   }
 };
 
-export const getUsersByIds = async (idxs: string) => {
+export const getUsersByIds = async (idxs: string | Array<string | number>) => {
   try {
-    const response = await fetch(`${API_URL}/users?idxs=${idxs}`, {
+    const idxsParam = Array.isArray(idxs) ? idxs.join(',') : idxs;
+    const response = await fetch(`${API_URL}/users?idxs=${idxsParam}`, {
       method: 'GET',
       mode: 'cors',
       redirect: 'follow',

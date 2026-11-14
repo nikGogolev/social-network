@@ -35,8 +35,15 @@ export class MessagesService {
         body: body.text,
         createdAt: Number(new Date()),
       });
+      return {
+        response: {
+          status: STATUSES.SUCCESS,
+          payload: dbResponse,
+        },
+      };
     } catch (error) {
       console.log(error);
+      return { error: error.message };
     }
   }
 }

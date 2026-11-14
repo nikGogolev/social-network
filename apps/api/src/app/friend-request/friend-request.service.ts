@@ -12,10 +12,10 @@ export class FriendRequestService {
       const dbResponse = await FriendRequests.create({
         initiatorId: body.initiatorId,
         targetId: body.targetId,
-        createAt: new Date().toLocaleString,
+        createdAt: new Date(),
         status: FRIEND_REQUEST_STATUS.requested,
       });
-      if (dbResponse.dataValues) {
+      if (dbResponse?.dataValues) {
         return {
           response: {
             status: STATUSES.SUCCESS,
@@ -23,6 +23,12 @@ export class FriendRequestService {
           },
         };
       }
+      return {
+        response: {
+          status: STATUSES.INTERNAL_ERROR,
+          message: 'Failed to create friend request',
+        },
+      };
     } catch (error) {
       return {
         response: { status: STATUSES.INTERNAL_ERROR, message: error.message },
@@ -38,7 +44,7 @@ export class FriendRequestService {
           targetId: queryParams.targetId,
         },
       });
-      if (dbResponse.dataValues) {
+      if (dbResponse?.dataValues) {
         const friendRequest: FriendRequestInterface =
           dbResponse.dataValues as FriendRequestInterface;
         return {
@@ -120,7 +126,7 @@ export class FriendRequestService {
     try {
       const dbResponse = await FriendRequests.update(
         {
-          updatedAt: new Date().toDateString(),
+          updatedAt: new Date(),
           status: body.status,
         },
         {

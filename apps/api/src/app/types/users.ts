@@ -10,12 +10,12 @@ export const User = sequelize.define(
       autoIncrement: true,
     },
     firstName: {
-      type: DataTypes.CHAR,
+      type: DataTypes.STRING,
       allowNull: false,
       unique: false,
     },
     lastName: {
-      type: DataTypes.CHAR,
+      type: DataTypes.STRING,
       allowNull: false,
       unique: false,
     },
@@ -25,17 +25,17 @@ export const User = sequelize.define(
       unique: false,
     },
     email: {
-      type: DataTypes.CHAR,
+      type: DataTypes.STRING,
       allowNull: false,
       unique: true,
     },
     pwdHash: {
-      type: DataTypes.CHAR,
+      type: DataTypes.STRING,
       allowNull: false,
       unique: false,
     },
     token: {
-      type: DataTypes.CHAR,
+      type: DataTypes.STRING,
       allowNull: false,
       unique: false,
     },

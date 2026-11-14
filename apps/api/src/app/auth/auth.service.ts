@@ -7,29 +7,20 @@ import { User } from '../types/users';
 export class AuthService {
   async auth(email, token) {
     try {
-      if (email) {
-        const dbResponse = await User.findOne({
-          where: { email: email },
-        });
+      if (!email || !token || email === 'undefined' || token === 'undefined') {
+        return {
+          response: {
+            status: STATUSES.NOT_AUTHORIZED,
+            message: 'You are not authorized',
+          },
+        };
+      }
 
-        const findedUser: UserInterface = dbResponse.dataValues;
-        if (token === findedUser.token) {
-          return {
-            response: {
-              status: STATUSES.SUCCESS,
-              payload: findedUser,
-            },
-          };
-        } else {
-          return {
-            response: {
-              status: STATUSES.NOT_AUTHORIZED,
-              message: 'You are not authorized',
-            },
-          };
-        }
-      } else {
-        console.log('User not exist');
+      const dbResponse = await User.findOne({
+        where: { email },
+      });
+
+      if (!dbResponse?.dataValues) {
         return {
           response: {
             status: STATUSES.USER_NOT_EXIST,
@@ -37,8 +28,32 @@ export class AuthService {
           },
         };
       }
+
+      const findedUser: UserInterface = dbResponse.dataValues;
+      if (token === findedUser.token) {
+        const { pwdHash: _pwdHash, token: _token, ...safeUser } = findedUser;
+        return {
+          response: {
+            status: STATUSES.SUCCESS,
+            payload: safeUser,
+          },
+        };
+      }
+
+      return {
+        response: {
+          status: STATUSES.NOT_AUTHORIZED,
+          message: 'You are not authorized',
+        },
+      };
     } catch (error) {
       console.log(error.message);
+      return {
+        response: {
+          status: STATUSES.INTERNAL_ERROR,
+          message: error.message,
+        },
+      };
     }
   }
 }

@@ -7,20 +7,21 @@ export const Profile = sequelize.define(
     userId: {
       type: DataTypes.BIGINT,
       primaryKey: true,
-      autoIncrement: true,
+      // Must match users.id — not auto-incremented independently
+      autoIncrement: false,
     },
     gender: {
-      type: DataTypes.CHAR,
+      type: DataTypes.STRING,
       allowNull: true,
       unique: false,
     },
     country: {
-      type: DataTypes.CHAR,
+      type: DataTypes.STRING,
       allowNull: true,
       unique: false,
     },
     hometown: {
-      type: DataTypes.CHAR,
+      type: DataTypes.STRING,
       allowNull: true,
       unique: false,
     },
@@ -30,7 +31,7 @@ export const Profile = sequelize.define(
       unique: false,
     },
     photo: {
-      type: DataTypes.CHAR,
+      type: DataTypes.STRING,
       allowNull: true,
       unique: false,
     },

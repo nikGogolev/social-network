@@ -26,12 +26,18 @@ function CustomApp({ Component, pageProps }: AppProps) {
   );
 }
 
-CustomApp.getInitialProps = async ({ Component, router, ctx }) => {
+CustomApp.getInitialProps = async ({ Component, ctx }) => {
   let pageProps = {};
+
+  const cookies = ctx.req?.cookies;
+  const authCookie =
+    cookies?.email && cookies?.token
+      ? { email: cookies.email, token: cookies.token }
+      : undefined;
 
   const res = process.browser
     ? await checkAuth()
-    : await checkAuth(ctx.req?.cookies);
+    : await checkAuth(authCookie);
 
   if (Component.getInitialProps) {
     pageProps = await Component.getInitialProps(ctx);
